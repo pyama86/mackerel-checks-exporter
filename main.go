@@ -88,6 +88,13 @@ func init() {
 	prometheus.MustRegister(version.NewCollector("mackerel_chekcs_exporter"))
 }
 
+var (
+	mversion  string
+	revision  string
+	goversion string
+	builddate string
+)
+
 func main() {
 	var (
 		listenAddress      = kingpin.Flag("web.listen-address", "Address to listen on for web interface and telemetry.").Default(":9111").String()
@@ -98,6 +105,11 @@ func main() {
 	promlogConfig := &promlog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.HelpFlag.Short('h')
+
+	v := fmt.Sprintf("mackerel-checks-exporter version: %s (%s)\n", mversion, revision)
+	v = v + fmt.Sprintf("build at %s (with %s)\n", builddate, goversion)
+	kingpin.Version(v)
+
 	kingpin.Parse()
 	logger := promlog.New(promlogConfig)
 

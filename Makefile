@@ -15,7 +15,7 @@ test: ## Run test
 	$(GO) test -race $(TEST)
 
 build: ## Build server
-	$(GO) build -ldflags "-X main.version=$(VERSION) -X main.revision=$(REVISION) -X \"main.goversion=$(GOVERSION)\" -X \"main.builddate=$(BUILDDATE)\" -X \"main.builduser=$(ME)\"" -o $(BUILD)/mackerel-checks-exporter
+	$(GO) build -ldflags "-X main.mversion=$(VERSION) -X main.revision=$(REVISION) -X \"main.goversion=$(GOVERSION)\" -X \"main.builddate=$(BUILDDATE)\" -X \"main.builduser=$(ME)\"" -o $(BUILD)/mackerel-checks-exporter
 
 run:
 	$(GO) run main.go
