@@ -1,0 +1,27 @@
+builds:
+  - main: main.go
+    ldflags:
+      - -s -w -X "main.mversion={{.Version}}" -X "main.commit={{.Commit}}" -X "main.date={{.Date}}" -X "main.goversion={{.Env.GOVERSION}}" -X "main.user={{.Env.USER}}"
+    env:
+      - GO111MODULE=on
+    goos:
+      - darwin
+      - linux
+    goarch:
+      - amd64
+archive:
+  name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+  files:
+    - none*
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+release:
+  prerelease: auto

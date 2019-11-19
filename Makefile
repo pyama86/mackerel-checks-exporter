@@ -19,3 +19,7 @@ build: ## Build server
 
 run:
 	$(GO) run main.go
+
+release:
+	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
+	GOVERSION="$(GOVERSION)" goreleaser --rm-dist --skip-validate
