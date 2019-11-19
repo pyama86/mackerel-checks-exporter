@@ -1,13 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	namespace = "mackerel-checks"
+	namespace = "mackerel_checks_exporter"
 )
 
 var (
@@ -85,7 +85,7 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 }
 
 func init() {
-	prometheus.MustRegister(version.NewCollector("mackerel-chekcs"))
+	prometheus.MustRegister(version.NewCollector("mackerel_chekcs_exporter"))
 }
 
 func main() {
@@ -105,15 +105,15 @@ func main() {
 	level.Info(logger).Log("build_context", version.BuildContext())
 
 	mackerelConf, err := config.LoadConfig(*mackerelConfigPath)
+	if err != nil {
+		level.Error(logger).Log("msg", "Error cant open mackerl.conf", "err", err)
+		os.Exit(1)
+	}
 
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	checkers := mackerel.CreateCheckers(mackerelConf)
-
-	c := make(chan os.Signal, 1)
-	termCh := make(chan struct{})
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
-
-	go signalHandler(c, termCh)
-	go mackerel.Loop(checkers, termCh)
+	go mackerel.Loop(checkers, ctx)
 
 	exporter, err := NewExporter(logger, mackerelConf)
 	if err != nil {
@@ -143,29 +143,27 @@ func main() {
              <p><a href='` + *metricsPath + `'>Metrics</a></p>
              <h2>Build</h2>
              <pre>` + version.Info() + ` ` + version.BuildContext() + `</pre>
-             </body>
-             </html>`))
+             </body> </html>`))
 	})
 
 	level.Info(logger).Log("msg", "Listening on address", "address", *listenAddress)
-	if err := http.ListenAndServe(*listenAddress, nil); err != nil {
-		level.Error(logger).Log("msg", "Error starting HTTP server", "err", err)
-		os.Exit(1)
-	}
-}
 
-var maxTerminatingInterval = 30 * time.Second
-
-func signalHandler(c chan os.Signal, termCh chan struct{}) {
-	received := false
-	for _ = range c {
-		if !received {
-			received = true
+	srv := &http.Server{Addr: *listenAddress}
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			level.Error(logger).Log("msg", "Error starting HTTP server", "err", err)
+			os.Exit(1)
 		}
-		termCh <- struct{}{}
-		go func() {
-			time.Sleep(maxTerminatingInterval)
-			termCh <- struct{}{}
-		}()
+	}()
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
+
+	<-sigCh
+	cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		level.Error(logger).Log("msg", "Shutdown HTTP server", "err", err)
 	}
+
+	os.Exit(0)
 }

@@ -5,8 +5,6 @@ but, I like mackerel.
 This tool is very useful that does not require mackerel.
 
 ```bash
-
-```bash
 make
 ./mackrel-checks-exporter [flags]
 ```

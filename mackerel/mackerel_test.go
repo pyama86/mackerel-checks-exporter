@@ -1,6 +1,7 @@
 package mackerel
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -15,7 +16,7 @@ func TestLoop(t *testing.T) {
 		logging.SetLogLevel(logging.DEBUG)
 	}
 
-	termCh := make(chan struct{})
+	ctx, cancel := context.WithCancel(context.Background())
 	exitCh := make(chan error)
 
 	checkers := []*checks.Checker{
@@ -31,7 +32,7 @@ func TestLoop(t *testing.T) {
 
 	// Start looping!
 	go func() {
-		exitCh <- Loop(checkers, termCh)
+		exitCh <- Loop(checkers, ctx)
 	}()
 
 	timer := time.NewTimer(time.Second * 1)
@@ -42,7 +43,7 @@ func TestLoop(t *testing.T) {
 		t.Errorf("can't get status got: %s", v)
 	}
 
-	termCh <- struct{}{}
+	cancel()
 	exitErr := <-exitCh
 	if exitErr != nil {
 		t.Errorf("exitErr should be nil, got: %s", exitErr)

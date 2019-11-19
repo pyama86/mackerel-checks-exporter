@@ -30,55 +30,36 @@ func init() {
 // import from github.com/mackerelio/mackerel-agent/command/command.go
 func CreateCheckers(conf *config.Config) []*checks.Checker {
 	checkers := []*checks.Checker{}
-
-	for name, pluginConfig := range conf.CheckPlugins {
-		checker := &checks.Checker{
-			Name:   name,
-			Config: pluginConfig,
+	if conf.CheckPlugins != nil {
+		for name, pluginConfig := range conf.CheckPlugins {
+			checker := &checks.Checker{
+				Name:   name,
+				Config: pluginConfig,
+			}
+			checkers = append(checkers, checker)
 		}
-		checkers = append(checkers, checker)
 	}
 
 	return checkers
 }
 
-func Loop(checkers []*checks.Checker, termCh chan struct{}) error {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	var termCheckerCh chan struct{}
-	hasChecks := len(checkers) > 0
-	if hasChecks {
-		termCheckerCh = make(chan struct{})
-	}
-
-	// fan-out termCh
-	go func() {
-		for range termCh {
-			if termCheckerCh != nil {
-				termCheckerCh <- struct{}{}
-			}
-		}
-	}()
-
-	if hasChecks {
-		runCheckersLoop(ctx, checkers, termCheckerCh)
+func Loop(checkers []*checks.Checker, ctx context.Context) error {
+	if len(checkers) > 0 {
+		runCheckersLoop(ctx, checkers)
 	}
 	return nil
 }
-func runCheckersLoop(ctx context.Context, checkers []*checks.Checker, termCheckerCh <-chan struct{}) {
+func runCheckersLoop(ctx context.Context, checkers []*checks.Checker) {
 	// Do not block checking.
 	checkReportCh := make(chan *checks.Report, reportCheckBufferSize*len(checkers))
-	reportImmediateCh := make(chan struct{}, reportCheckBufferSize*len(checkers))
 
 	for _, checker := range checkers {
-		go runChecker(ctx, checker, checkReportCh, reportImmediateCh)
+		go runChecker(ctx, checker, checkReportCh)
 	}
 
 	for {
 		select {
-		case <-termCheckerCh:
-			logger.Debugf("received 'term' chan for checkers loop")
+		case <-ctx.Done():
 			return
 		case report := <-checkReportCh:
 			CheckResult.Store(report.Name, report.Status)
@@ -88,7 +69,7 @@ func runCheckersLoop(ctx context.Context, checkers []*checks.Checker, termChecke
 
 }
 
-func runChecker(ctx context.Context, checker *checks.Checker, checkReportCh chan *checks.Report, reportImmediateCh chan struct{}) {
+func runChecker(ctx context.Context, checker *checks.Checker, checkReportCh chan *checks.Report) {
 	lastStatus := checks.StatusUndefined
 	lastMessage := ""
 	interval := checker.Interval()
@@ -130,14 +111,6 @@ func runChecker(ctx context.Context, checker *checks.Checker, checkReportCh chan
 				continue
 			}
 			checkReportCh <- report
-
-			// If status has changed, send it immediately
-			// but if the status was OK and it's first invocation of a check, do not
-			if report.Status != lastStatus && !(report.Status == checks.StatusOK && lastStatus == checks.StatusUndefined) {
-				logger.Debugf("checker %q: status has changed %v -> %v: send it immediately", checker.Name, lastStatus, report.Status)
-				reportImmediateCh <- struct{}{}
-			}
-
 			lastStatus = report.Status
 			lastMessage = report.Message
 		case <-ctx.Done():
