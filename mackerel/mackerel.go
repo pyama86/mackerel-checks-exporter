@@ -19,9 +19,11 @@ var (
 var logger = logging.GetLogger("command")
 
 var CheckResult sync.Map
+var CheckResultMessage sync.Map
 
 func init() {
 	CheckResult = sync.Map{}
+	CheckResultMessage = sync.Map{}
 }
 
 // LICENCE: https://github.com/mackerelio/mackerel-agent/blob/master/LICENSE
@@ -40,7 +42,7 @@ func CreateCheckers(conf *config.Config) []*checks.Checker {
 	return checkers
 }
 
-func loop(checkers []*checks.Checker, termCh chan struct{}) error {
+func Loop(checkers []*checks.Checker, termCh chan struct{}) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -80,6 +82,7 @@ func runCheckersLoop(ctx context.Context, checkers []*checks.Checker, termChecke
 			return
 		case report := <-checkReportCh:
 			CheckResult.Store(report.Name, report.Status)
+			CheckResultMessage.Store(report.Name, report.Message)
 		}
 	}
 

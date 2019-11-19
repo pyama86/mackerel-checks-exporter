@@ -31,7 +31,7 @@ func TestLoop(t *testing.T) {
 
 	// Start looping!
 	go func() {
-		exitCh <- loop(checkers, termCh)
+		exitCh <- Loop(checkers, termCh)
 	}()
 
 	timer := time.NewTimer(time.Second * 1)

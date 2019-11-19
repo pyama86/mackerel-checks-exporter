@@ -7,6 +7,7 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible // indirect
 	github.com/go-kit/kit v0.9.0
 	github.com/gorilla/websocket v1.4.1 // indirect
+	github.com/hashicorp/vault v1.3.0
 	github.com/juju/ansiterm v0.0.0-20180109212912-720a0952cc2a // indirect
 	github.com/juju/clock v0.0.0-20190205081909-9c5c9712527c // indirect
 	github.com/juju/cmd v0.0.0-20190815094254-0c5c82a8dfc6 // indirect
@@ -33,11 +34,8 @@ require (
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/mackerelio/golib v0.0.0-20190411032134-c87047ca454e
 	github.com/mackerelio/mackerel-agent v0.64.0
-	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
-	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
-	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/prometheus/client_golang v1.2.1
 	github.com/prometheus/common v0.7.0
 	github.com/revel/config v0.21.0

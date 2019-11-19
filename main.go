@@ -5,16 +5,20 @@ import (
 	"net/http"
 	_ "net/http/pprof"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"git.pepabo.com/fukuoka-admin/ghost/config"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
-	"github.com/k0kubun/pp"
+	"github.com/mackerelio/mackerel-agent/checks"
+	"github.com/mackerelio/mackerel-agent/config"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
 	"github.com/prometheus/common/promlog/flag"
 	"github.com/prometheus/common/version"
+	"github.com/pyama86/mackerel-check-plugin-exporter/mackerel"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -23,10 +27,10 @@ const (
 )
 
 var (
-	checks = prometheus.NewDesc(
+	mackerelChecks = prometheus.NewDesc(
 		prometheus.BuildFQName(namespace, "", "check_status"),
 		"Status of health checks associated with mackerel checks.",
-		[]string{"check", "node", "check_name", "status"}, nil,
+		[]string{"check_name", "status", "message"}, nil,
 	)
 )
 
@@ -40,31 +44,44 @@ func (l promHTTPLogger) Println(v ...interface{}) {
 
 type Exporter struct {
 	logger log.Logger
+	conf   *config.Config
 }
 
-func NewExporter(logger log.Logger) (*Exporter, error) {
+func NewExporter(logger log.Logger, conf *config.Config) (*Exporter, error) {
 	return &Exporter{
 		logger: logger,
+		conf:   conf,
 	}, nil
 }
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
-	ch <- checks
+	ch <- mackerelChecks
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
-	//	ok := e.collectPeersMetric(ch)
-	/*
+	for n, _ := range e.conf.CheckPlugins {
+		v, ok := mackerel.CheckResult.Load(n)
+		vm, _ := mackerel.CheckResultMessage.Load(n)
 		if ok {
+
+			var up float64
+			switch v.(checks.Status) {
+			case checks.StatusOK:
+				up = 1.0
+			case checks.StatusWarning:
+				up = 2.0
+			case checks.StatusCritical:
+				up = 3.0
+			case checks.StatusUnknown:
+				up = 0.0
+			}
+
 			ch <- prometheus.MustNewConstMetric(
-				up, prometheus.GaugeValue, 1.0,
-			)
-		} else {
-			ch <- prometheus.MustNewConstMetric(
-				up, prometheus.GaugeValue, 0.0,
+				mackerelChecks, prometheus.GaugeValue, up, n, string(v.(checks.Status)), vm.(string),
 			)
 		}
-	*/
+
+	}
 }
 
 func init() {
@@ -89,12 +106,16 @@ func main() {
 
 	mackerelConf, err := config.LoadConfig(*mackerelConfigPath)
 
-	pp.Println(mackerelConf)
-	if err != nil {
-		level.Error(logger).Log("msg", "can't read mackerell config", "err", err)
-		os.Exit(1)
-	}
-	exporter, err := NewExporter(logger)
+	checkers := mackerel.CreateCheckers(mackerelConf)
+
+	c := make(chan os.Signal, 1)
+	termCh := make(chan struct{})
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGHUP)
+
+	go signalHandler(c, termCh)
+	go mackerel.Loop(checkers, termCh)
+
+	exporter, err := NewExporter(logger, mackerelConf)
 	if err != nil {
 		level.Error(logger).Log("msg", "Error creating the exporter", "err", err)
 		os.Exit(1)
@@ -130,5 +151,21 @@ func main() {
 	if err := http.ListenAndServe(*listenAddress, nil); err != nil {
 		level.Error(logger).Log("msg", "Error starting HTTP server", "err", err)
 		os.Exit(1)
+	}
+}
+
+var maxTerminatingInterval = 30 * time.Second
+
+func signalHandler(c chan os.Signal, termCh chan struct{}) {
+	received := false
+	for _ = range c {
+		if !received {
+			received = true
+		}
+		termCh <- struct{}{}
+		go func() {
+			time.Sleep(maxTerminatingInterval)
+			termCh <- struct{}{}
+		}()
 	}
 }
