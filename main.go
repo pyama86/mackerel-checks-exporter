@@ -9,6 +9,7 @@ import (
 	"git.pepabo.com/fukuoka-admin/ghost/config"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/k0kubun/pp"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
@@ -88,6 +89,7 @@ func main() {
 
 	mackerelConf, err := config.LoadConfig(*mackerelConfigPath)
 
+	pp.Println(mackerelConf)
 	if err != nil {
 		level.Error(logger).Log("msg", "can't read mackerell config", "err", err)
 		os.Exit(1)
