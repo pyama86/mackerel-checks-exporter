@@ -1,27 +1,40 @@
 builds:
-  - main: main.go
+  -
+    id: mackerel-checks-exporter-linux
+    main: main.go
     ldflags:
-      - -s -w -X "main.mversion={{.Version}}" -X "main.commit={{.Commit}}" -X "main.date={{.Date}}" -X "main.goversion={{.Env.GOVERSION}}" -X "main.user={{.Env.USER}}"
+      - -s -w -X "main.mversion={{.Version}}" -X "main.revision={{.Commit}}" -X "main.builddate={{.Date}}" -X "main.goversion={{.Env.GOVERSION}}"
+    binary: mackerel-checks-exporter
+    env:
+      - GO111MODULE=on
+    goos:
+      - linux
+    goarch:
+      - amd64
+  -
+    id: mackerel-checks-exporter-darwin
+    main: main.go
+    ldflags:
+      - -s -w -X "main.mversion={{.Version}}" -X "main.revision={{.Commit}}" -X "main.builddate={{.Date}}" -X "main.goversion={{.Env.GOVERSION}}"
+    binary: mackerel-checks-exporter
     env:
       - GO111MODULE=on
     goos:
       - darwin
-      - linux
     goarch:
       - amd64
-archive:
-  name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
-  files:
-    - none*
-checksum:
-  name_template: 'checksums.txt'
-snapshot:
-  name_template: "{{ .Tag }}-next"
-changelog:
-  sort: asc
-  filters:
-    exclude:
-    - '^docs:'
-    - '^test:'
-release:
-  prerelease: auto
+nfpms:
+  -
+    id: mackerel-checks-exporter-nfpms
+    name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
+    builds:
+    - mackerel-checks-exporter-linux
+    homepage: https://github.com/pama86/mackerel-checks-exporter
+    maintainer: Kazuhiko Yamashita <www.kazu.com@gmail.com>
+    description: Mackerel migration exporter
+    license: Apache License 2.0
+    formats:
+      - deb
+      - rpm
+    bindir: /usr/bin
+    epoch: 1

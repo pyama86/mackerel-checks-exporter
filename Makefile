@@ -22,4 +22,5 @@ run:
 
 release:
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
+	rm -rf dist/*
 	GOVERSION="$(GOVERSION)" goreleaser --rm-dist --skip-validate
