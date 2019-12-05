@@ -32,6 +32,11 @@ var (
 		"Status of health checks associated with mackerel checks.",
 		[]string{"check_name", "status", "message"}, nil,
 	)
+	mackerelPlugins = prometheus.NewDesc(
+		prometheus.BuildFQName(namespace, "", "plugin_value"),
+		"Value of mackerel plugins.",
+		[]string{"name"}, nil,
+	)
 )
 
 type promHTTPLogger struct {
@@ -56,6 +61,7 @@ func NewExporter(logger log.Logger, conf *config.Config) (*Exporter, error) {
 
 func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	ch <- mackerelChecks
+	ch <- mackerelPlugins
 }
 
 func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
@@ -63,7 +69,6 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 		v, ok := mackerel.CheckResult.Load(n)
 		vm, _ := mackerel.CheckResultMessage.Load(n)
 		if ok {
-
 			var up float64
 			switch v.(checks.Status) {
 			case checks.StatusOK:
@@ -80,8 +85,13 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 				mackerelChecks, prometheus.GaugeValue, up, n, string(v.(checks.Status)), vm.(string),
 			)
 		}
-
 	}
+	mackerel.PluginResult.Range(func(key, value interface{}) bool {
+		ch <- prometheus.MustNewConstMetric(
+			mackerelPlugins, prometheus.GaugeValue, value.(float64), key.(string),
+		)
+		return true
+	})
 }
 
 func init() {
@@ -125,7 +135,8 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	checkers := mackerel.CreateCheckers(mackerelConf)
-	go mackerel.Loop(checkers, ctx)
+	plugins := mackerel.PluginGenerators(mackerelConf)
+	go mackerel.Loop(checkers, plugins, ctx)
 
 	exporter, err := NewExporter(logger, mackerelConf)
 	if err != nil {
