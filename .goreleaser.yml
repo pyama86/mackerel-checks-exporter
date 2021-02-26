@@ -2,8 +2,6 @@ builds:
   -
     id: mackerel-checks-exporter-linux
     main: main.go
-    ldflags:
-      - -s -w
     binary: mackerel-checks-exporter
     env:
       - GO111MODULE=on
@@ -14,8 +12,6 @@ builds:
   -
     id: mackerel-checks-exporter-darwin
     main: main.go
-    ldflags:
-      - -s -w
     binary: mackerel-checks-exporter
     env:
       - GO111MODULE=on
