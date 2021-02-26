@@ -23,7 +23,7 @@ run:
 release:
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
 	rm -rf dist/*
-	GOVERSION="$(GOVERSION)" goreleaser --rm-dist --skip-validate
+	BUILDDATE="$(BUILDDATE) VERSION="$(VERSION) REVISION="$(REVISION) "GOVERSION="$(GOVERSION)" goreleaser --rm-dist --skip-validate
 
 docker:
 	docker build -t pyama/mackerel-check-plugin-exporter:$(VERSION) .

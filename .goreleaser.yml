@@ -3,7 +3,7 @@ builds:
     id: mackerel-checks-exporter-linux
     main: main.go
     ldflags:
-      - -s -w -X "main.mversion={{.Version}}" -X "main.revision={{.Commit}}" -X "main.builddate={{.Date}}" -X "main.goversion={{.Env.GOVERSION}}"
+      - -s -w -X "main.mversion={{.Env.VERSION}}" -X "main.revision={{.Env.REVISION}}" -X "main.builddate={{.Env.BUILD_DATE}}" -X "main.goversion={{.Env.GOVERSION}}"
     binary: mackerel-checks-exporter
     env:
       - GO111MODULE=on
@@ -15,7 +15,7 @@ builds:
     id: mackerel-checks-exporter-darwin
     main: main.go
     ldflags:
-      - -s -w -X "main.mversion={{.Version}}" -X "main.revision={{.Commit}}" -X "main.builddate={{.Date}}" -X "main.goversion={{.Env.GOVERSION}}"
+      - -s -w -X "main.mversion={{.Env.VERSION}}" -X "main.revision={{.Env.REVISION}}" -X "main.builddate={{.Env.BUILD_DATE}}" -X "main.goversion={{.Env.GOVERSION}}"
     binary: mackerel-checks-exporter
     env:
       - GO111MODULE=on
@@ -26,7 +26,7 @@ builds:
 nfpms:
   -
     id: mackerel-checks-exporter-nfpms
-    name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
+    file_name_template: "{{ .ProjectName }}_{{ .Version }}-1_{{ .Arch }}"
     builds:
     - mackerel-checks-exporter-linux
     homepage: https://github.com/pama86/mackerel-checks-exporter
