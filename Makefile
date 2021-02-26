@@ -15,7 +15,7 @@ test: ## Run test
 	$(GO) test -race $(TEST)
 
 build: ## Build server
-	$(GO) build -ldflags "-s -w -X main.mversion=$(VERSION) -X main.revision=$(REVISION) -X \"main.goversion=$(GOVERSION)\" -X \"main.builddate=$(BUILDDATE)\"" -o $(BUILD)/mackerel-checks-exporter
+	$(GO) build -ldflags "-s -w -X main.version=$(VERSION) -X main.commit=$(REVISION) -X \"main.goversion=$(GOVERSION)\" -X \"main.date=$(BUILDDATE)\"" -o $(BUILD)/mackerel-checks-exporter
 
 run:
 	$(GO) run main.go
@@ -23,7 +23,7 @@ run:
 release:
 	@echo "$(INFO_COLOR)==> $(RESET)$(BOLD)Releasing for Github$(RESET)"
 	rm -rf dist/*
-	BUILDDATE="$(BUILDDATE) VERSION="$(VERSION) REVISION="$(REVISION) "GOVERSION="$(GOVERSION)" goreleaser --rm-dist --skip-validate
+	goreleaser --rm-dist --skip-validate
 
 docker:
 	docker build -t pyama/mackerel-check-plugin-exporter:$(VERSION) .

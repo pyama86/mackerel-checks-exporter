@@ -17,7 +17,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/prometheus/common/promlog"
 	"github.com/prometheus/common/promlog/flag"
-	"github.com/prometheus/common/version"
+	common_version "github.com/prometheus/common/version"
 	"github.com/pyama86/mackerel-check-plugin-exporter/mackerel"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
@@ -95,14 +95,15 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 }
 
 func init() {
-	prometheus.MustRegister(version.NewCollector("mackerel_chekcs_exporter"))
+	prometheus.MustRegister(common_version.NewCollector("mackerel_chekcs_exporter"))
 }
 
 var (
-	mversion  string
-	revision  string
-	goversion string
-	builddate string
+	version   = "dev"
+	goversion = ""
+	commit    = "none"
+	date      = "unknown"
+	builtBy   = "unknown"
 )
 
 func main() {
@@ -116,15 +117,15 @@ func main() {
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
 	kingpin.HelpFlag.Short('h')
 
-	v := fmt.Sprintf("mackerel-checks-exporter version: %s (%s)\n", mversion, revision)
-	v = v + fmt.Sprintf("build at %s (with %s)\n", builddate, goversion)
+	v := fmt.Sprintf("mackerel-checks-exporter version: %s (%s)\n", version, commit)
+	v = v + fmt.Sprintf("build at %s (with %s)\n", date, goversion)
 	kingpin.Version(v)
 
 	kingpin.Parse()
 	logger := promlog.New(promlogConfig)
 
-	level.Info(logger).Log("msg", "Starting mackerel_checks_exporter", "version", version.Info())
-	level.Info(logger).Log("build_context", version.BuildContext())
+	level.Info(logger).Log("msg", "Starting mackerel_checks_exporter", "version", common_version.Info())
+	level.Info(logger).Log("build_context", common_version.BuildContext())
 
 	mackerelConf, err := config.LoadConfig(*mackerelConfigPath)
 	if err != nil {
@@ -165,7 +166,7 @@ func main() {
              <h1>Mackerel Checks Exporter</h1>
              <p><a href='` + *metricsPath + `'>Metrics</a></p>
              <h2>Build</h2>
-             <pre>` + version.Info() + ` ` + version.BuildContext() + `</pre>
+             <pre>` + common_version.Info() + ` ` + common_version.BuildContext() + `</pre>
              </body> </html>`))
 	})
 

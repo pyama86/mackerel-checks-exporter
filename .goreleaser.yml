@@ -3,7 +3,7 @@ builds:
     id: mackerel-checks-exporter-linux
     main: main.go
     ldflags:
-      - -s -w -X "main.mversion={{.Env.VERSION}}" -X "main.revision={{.Env.REVISION}}" -X "main.builddate={{.Env.BUILD_DATE}}" -X "main.goversion={{.Env.GOVERSION}}"
+      - -s -w
     binary: mackerel-checks-exporter
     env:
       - GO111MODULE=on
@@ -15,7 +15,7 @@ builds:
     id: mackerel-checks-exporter-darwin
     main: main.go
     ldflags:
-      - -s -w -X "main.mversion={{.Env.VERSION}}" -X "main.revision={{.Env.REVISION}}" -X "main.builddate={{.Env.BUILD_DATE}}" -X "main.goversion={{.Env.GOVERSION}}"
+      - -s -w
     binary: mackerel-checks-exporter
     env:
       - GO111MODULE=on
