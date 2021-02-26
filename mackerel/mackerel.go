@@ -125,6 +125,10 @@ func runChecker(ctx context.Context, checker *checks.Checker, checkReportCh chan
 				}()
 			}
 
+			if report.Status != checks.StatusOK && report.Status != lastStatus {
+				logger.Infof("checker %s result:%s message=%s", checker.Name, report.Status, report.Message)
+			}
+
 			if report.Status == checks.StatusOK && report.Status == lastStatus && report.Message == lastMessage {
 				// Do not report if nothing has changed
 				continue
