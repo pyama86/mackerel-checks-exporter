@@ -32,7 +32,7 @@ func TestLoop(t *testing.T) {
 
 	// Start looping!
 	go func() {
-		exitCh <- Loop(checkers, ctx)
+		exitCh <- Loop(checkers, nil, ctx)
 	}()
 
 	timer := time.NewTimer(time.Second * 1)
