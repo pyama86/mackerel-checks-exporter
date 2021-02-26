@@ -114,7 +114,7 @@ func runChecker(ctx context.Context, checker *checks.Checker, checkReportCh chan
 			if checker.Config.Action != nil {
 				env := []string{fmt.Sprintf("MACKEREL_STATUS=%s", report.Status), fmt.Sprintf("MACKEREL_PREVIOUS_STATUS=%s", lastStatus), fmt.Sprintf("MACKEREL_CHECK_MESSAGE=%s", report.Message)}
 				go func() {
-					logger.Debugf("Checker %q action: %q env: %+v", checker.Name, checker.Config.Action.CommandString(), env)
+					logger.Infof("Checker %q action: %q env: %+v", checker.Name, checker.Config.Action.CommandString(), env)
 					stdout, stderr, exitCode, _ := checker.Config.Action.RunWithEnv(env)
 
 					if stderr != "" {
