@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/mackerelio/mackerel-agent/checks"
@@ -19,7 +20,6 @@ import (
 	"github.com/prometheus/common/promlog/flag"
 	common_version "github.com/prometheus/common/version"
 	"github.com/pyama86/mackerel-check-plugin-exporter/mackerel"
-	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 const (
