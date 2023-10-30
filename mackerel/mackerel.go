@@ -1,6 +1,7 @@
 package mackerel
 
 import (
+	"container/ring"
 	"context"
 	"fmt"
 	"sync"
@@ -23,6 +24,7 @@ var logger = logging.GetLogger("command")
 var CheckResult sync.Map
 var CheckResultMessage sync.Map
 var PluginResult sync.Map
+var checkHistry sync.Map
 
 func init() {
 	CheckResult = sync.Map{}
@@ -139,6 +141,25 @@ func runChecker(ctx context.Context, checker *checks.Checker, checkReportCh chan
 				lastMessage = report.Message
 				continue
 			}
+
+			if checker.Config.MaxCheckAttempts != nil && *checker.Config.MaxCheckAttempts > 0 {
+				h, _ := checkHistry.LoadOrStore(checker.Name, ring.New(int(*checker.Config.MaxCheckAttempts)))
+				history := h.(*ring.Ring)
+				history.Value = report.Status
+				history = history.Next()
+				notOkCount := int32(0)
+				history.Do(func(x interface{}) {
+					if x != checks.StatusOK {
+						notOkCount++
+					}
+				})
+
+				if notOkCount <= *checker.Config.MaxCheckAttempts {
+					logger.Debugf("checker %s notOkCount=%d", checker.Name, notOkCount)
+					report.Status = checks.StatusOK
+				}
+			}
+			logger.Debugf("checker %s report.Status=%s", checker.Name, report.Status)
 			checkReportCh <- report
 			lastStatus = report.Status
 			lastMessage = report.Message
