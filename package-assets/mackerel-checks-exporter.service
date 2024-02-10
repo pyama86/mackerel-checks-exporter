@@ -1,0 +1,15 @@
+[Service]
+Type=simple
+EnvironmentFile=/etc/default/mackerel-checks-exporter
+ExecStart=/usr/bin/mackerel-checks-exporter $ARGS
+RestartSec=30s
+Restart=on-failure
+WorkingDirectory=/
+User=root
+
+[Unit]
+Description=Systemd unit for Prometheus Mackerel Checks Exporter
+After=network.target remote-fs.target apiserver.service
+
+[Install]
+WantedBy=multi-user.target

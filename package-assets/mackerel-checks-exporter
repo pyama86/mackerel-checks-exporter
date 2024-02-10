@@ -1,0 +1,1 @@
+ARGS="--web.listen-address=0.0.0.0:9111 --mackerel.config-path=/etc/mackerel-agent/mackerel-agent.conf"

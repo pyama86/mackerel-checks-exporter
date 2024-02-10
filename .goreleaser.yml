@@ -34,3 +34,10 @@ nfpms:
       - rpm
     bindir: /usr/bin
     epoch: 1
+    contents:
+      - src: ./package-assets/mackerel-checks-exporter.service
+        dst: /etc/systemd/system/mackerel-checks-exporter.service
+        type: config
+      - src: ./package-assets/mackerel-checks-exporter
+        dst: /etc/default/mackerel-checks-exporter
+        type: config
