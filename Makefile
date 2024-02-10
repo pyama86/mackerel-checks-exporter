@@ -26,6 +26,6 @@ release:
 	goreleaser --rm-dist --skip-validate
 
 docker:
-	docker build -t pyama/mackerel-check-plugin-exporter:$(VERSION) .
+	docker build --platform linux/amd64 -t pyama/mackerel-check-plugin-exporter:$(VERSION) .
 	docker push pyama/mackerel-check-plugin-exporter:$(VERSION)
 
