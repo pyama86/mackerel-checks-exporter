@@ -72,8 +72,6 @@ dockers:
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.source=https://git.pepabo.com/pepactions/pepacache"
       - "--platform=linux/arm64"
-    extra_files:
-      *extra_files
 
 docker_manifests:
 - name_template: 'pyama/mackerel-check-plugin-exporter{{ .Version }}'
