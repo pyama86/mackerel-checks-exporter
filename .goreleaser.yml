@@ -41,3 +41,50 @@ nfpms:
       - src: ./package-assets/mackerel-checks-exporter
         dst: /etc/default/mackerel-checks-exporter
         type: config
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-amd64'
+      - 'pyama/mackerel-check-plugin-exporter:latest-amd64'
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://git.pepabo.com/pepactions/pepacache"
+      - "--platform=linux/amd64"
+    extra_files: &extra_files
+      - scripts/entrypoint.sh
+      - scripts/save.sh
+      - scripts/restore.sh
+  -
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-arm64'
+      - 'pyama/mackerel-check-plugin-exporter:latest-arm64'
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.source=https://git.pepabo.com/pepactions/pepacache"
+      - "--platform=linux/arm64"
+    extra_files:
+      *extra_files
+
+docker_manifests:
+- name_template: 'pyama/mackerel-check-plugin-exporter{{ .Version }}'
+  image_templates:
+  - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-arm64'
+  - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-amd64'
+- name_template: 'pyama/mackerel-check-plugin-exporter:latest'
+  image_templates:
+  - 'pyama/mackerel-check-plugin-exporter:latest-arm64'
+  - 'pyama/mackerel-check-plugin-exporter:latest-amd64'
