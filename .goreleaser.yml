@@ -4,21 +4,12 @@ builds:
     main: main.go
     binary: mackerel-checks-exporter
     env:
-      - GO111MODULE=on
+      - CGO_ENABLED=0
     goos:
       - linux
     goarch:
       - amd64
-  -
-    id: mackerel-checks-exporter-darwin
-    main: main.go
-    binary: mackerel-checks-exporter
-    env:
-      - GO111MODULE=on
-    goos:
-      - darwin
-    goarch:
-      - amd64
+      - arm64
 nfpms:
   -
     id: mackerel-checks-exporter-nfpms
@@ -41,3 +32,42 @@ nfpms:
       - src: ./package-assets/mackerel-checks-exporter
         dst: /etc/default/mackerel-checks-exporter
         type: config
+dockers:
+  -
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-amd64'
+      - 'pyama/mackerel-check-plugin-exporter:latest-amd64'
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/amd64"
+  -
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-arm64'
+      - 'pyama/mackerel-check-plugin-exporter:latest-arm64'
+    dockerfile: Dockerfile
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.name={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--platform=linux/arm64"
+
+docker_manifests:
+- name_template: 'pyama/mackerel-check-plugin-exporter{{ .Version }}'
+  image_templates:
+  - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-arm64'
+  - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-amd64'
+- name_template: 'pyama/mackerel-check-plugin-exporter:latest'
+  image_templates:
+  - 'pyama/mackerel-check-plugin-exporter:latest-arm64'
+  - 'pyama/mackerel-check-plugin-exporter:latest-amd64'
