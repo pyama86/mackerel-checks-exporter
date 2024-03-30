@@ -63,7 +63,7 @@ dockers:
       - "--platform=linux/arm64"
 
 docker_manifests:
-- name_template: 'pyama/mackerel-check-plugin-exporter{{ .Version }}'
+- name_template: 'pyama/mackerel-check-plugin-exporter:{{ .Version }}'
   image_templates:
   - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-arm64'
   - 'pyama/mackerel-check-plugin-exporter{{ .Version }}-amd64'
