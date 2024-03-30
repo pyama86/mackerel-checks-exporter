@@ -94,10 +94,6 @@ func (e *Exporter) Collect(ch chan<- prometheus.Metric) {
 	})
 }
 
-func init() {
-	prometheus.MustRegister(common_version.NewCollector("mackerel_chekcs_exporter"))
-}
-
 var (
 	version   = "dev"
 	goversion = ""
