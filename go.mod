@@ -6,7 +6,7 @@ require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/go-kit/kit v0.13.0
 	github.com/mackerelio/golib v1.2.1
-	github.com/mackerelio/mackerel-agent v0.80.0
+	github.com/mackerelio/mackerel-agent v0.81.0
 	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/common v0.51.1
 )
@@ -22,10 +22,11 @@ require (
 	github.com/go-kit/log v0.2.1 // indirect
 	github.com/go-logfmt/logfmt v0.6.0 // indirect
 	github.com/mackerelio/go-osstat v0.2.4 // indirect
-	github.com/mackerelio/mackerel-client-go v0.30.0 // indirect
+	github.com/mackerelio/mackerel-client-go v0.31.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_model v0.6.0 // indirect
 	github.com/prometheus/procfs v0.13.0 // indirect
+	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
