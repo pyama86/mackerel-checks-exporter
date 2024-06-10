@@ -8,7 +8,7 @@ require (
 	github.com/mackerelio/golib v1.2.1
 	github.com/mackerelio/mackerel-agent v0.80.0
 	github.com/prometheus/client_golang v1.19.0
-	github.com/prometheus/common v0.51.1
+	github.com/prometheus/common v0.54.0
 )
 
 require (
@@ -24,10 +24,10 @@ require (
 	github.com/mackerelio/go-osstat v0.2.4 // indirect
 	github.com/mackerelio/mackerel-client-go v0.30.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/prometheus/client_model v0.6.0 // indirect
+	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/procfs v0.13.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.19.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.34.0 // indirect
 )
