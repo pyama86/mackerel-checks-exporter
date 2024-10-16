@@ -11,6 +11,7 @@ import (
 	"github.com/mackerelio/mackerel-agent/checks"
 	"github.com/mackerelio/mackerel-agent/config"
 	"github.com/mackerelio/mackerel-agent/metrics"
+	"github.com/thoas/go-funk"
 )
 
 var (
@@ -81,13 +82,21 @@ func runCheckersLoop(ctx context.Context, checkers []*checks.Checker, plugins []
 			return
 		case <-ticker.C:
 			values := generateValues(plugins)
+			storedKeys := []string{}
 			for _, vs := range values {
 				if vs != nil {
 					for k, v := range vs.Values {
 						PluginResult.Store(k, v)
+						storedKeys = append(storedKeys, k)
 					}
 				}
 			}
+			PluginResult.Range(func(k, v interface{}) bool {
+				if !funk.ContainsString(storedKeys, k.(string)) {
+					PluginResult.Delete(k)
+				}
+				return true
+			})
 		case report := <-checkReportCh:
 			CheckResult.Store(report.Name, report.Status)
 			CheckResultMessage.Store(report.Name, report.Message)

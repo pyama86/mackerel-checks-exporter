@@ -9,6 +9,7 @@ require (
 	github.com/mackerelio/mackerel-agent v0.80.0
 	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/common v0.51.1
+	github.com/thoas/go-funk v0.9.3
 )
 
 require (
